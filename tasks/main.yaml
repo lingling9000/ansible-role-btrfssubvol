@@ -1,6 +1,11 @@
 ---
 # tasks file for btrfssubvol
 
+# ---------- Checks ----------
+
+
+# ---------- Configure ----------
+
 - name: Mount btrfs root volume
   ansible.posix.mount:
     src: "/dev/disk/by-uuid/{{ btrfssubvol_device_uuid }}"
