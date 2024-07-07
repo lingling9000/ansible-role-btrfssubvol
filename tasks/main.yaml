@@ -3,7 +3,7 @@
 
 - name: Mount btrfs root volume
   ansible.posix.mount:
-    src: "{{ btrfssubvol_device }}"
+    src: "/dev/disk/by-uuid/{{ btrfssubvol_device_uuid }}"
     path: /mnt
     opts: defaults,noatime,discard,compress=zstd,subvolid=5
     state: ephemeral
