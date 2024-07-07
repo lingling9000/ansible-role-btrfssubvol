@@ -3,17 +3,17 @@
 
 - name: Check if subvolume already exists
   ansible.builtin.stat:
-    path: "/mnt/@{{ subvolume.name }}"
+    path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
   register: subvolume_folder
 
 - name: Create subvolume {{ subvolume.name }}
   ansible.builtin.command:
-    cmd: btrfs subvolume create /mnt/@{{ subvolume.name }}
+    cmd: btrfs subvolume create {{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}
   when: not subvolume_folder.stat.exists
 
 - name: Set permissions for subvolume {{ subvolume.name }}
   ansible.builtin.file:
-    path: "/mnt/@{{ subvolume.name }}"
+    path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
     owner: "{{ subvolume.owner | default('root') }}"
     group: "{{ subvolume.group | default('root') }}"
 

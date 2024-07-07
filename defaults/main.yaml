@@ -3,6 +3,8 @@
 
 btrfssubvol_device_uuid: null
 
+btrfssubvol_rootvol_mount_point: /mnt
+
 btrfssubvol_subvolumes: null
 
 # End of file
