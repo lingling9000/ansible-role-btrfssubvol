@@ -1,4 +1,24 @@
 ---
 # tasks file for btrfssubvol
 
+- name: Mount btrfs root volume
+  ansible.posix.mount:
+    src: "{{ btrfssubvol_device }}"
+    path: /mnt
+    opts: defaults,noatime,discard,compress=zstd,subvolid=5
+    state: ephemeral
+    fstype: btrfs
+
+- name: Create subvolumes
+  ansible.builtin.include_tasks:
+    file: tasks/subvolumes.yaml
+  loop: "{{ btrfssubvol_subvolumes }}"
+  loop_control:
+    loop_var: subvolume
+
+- name: Unmount btrfs root volume
+  ansible.posix.mount:
+    path: /mnt
+    state: unmounted
+
 # End of file

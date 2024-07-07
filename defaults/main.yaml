@@ -1,4 +1,10 @@
 ---
 # defaults file for btrfssubvol
 
+btrfssubvol_device: /dev/sdXN
+
+btrfssubvol_device_uuid: null
+
+btrfssubvol_subvolumes: null
+
 # End of file
