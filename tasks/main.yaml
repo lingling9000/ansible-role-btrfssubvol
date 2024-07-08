@@ -3,6 +3,30 @@
 
 # ---------- Checks ----------
 
+- name: Check public role variable syntax
+  ansible.builtin.assert:
+    that:
+      # btrfssubvol_device_uuid is a string
+      - btrfssubvol_device_uuid is defined
+      - btrfssubvol_device_uuid is not none
+      - btrfssubvol_device_uuid is string
+      - btrfssubvol_device_uuid | length > 0
+
+      # btrfssubvol_rootvol_mount_point is a string
+      - btrfssubvol_rootvol_mount_point is defined
+      - btrfssubvol_rootvol_mount_point is not none
+      - btrfssubvol_rootvol_mount_point is string
+      - btrfssubvol_rootvol_mount_point | length > 0
+
+      # btrfssubvol_subvolumes is a list
+      - btrfssubvol_subvolumes is defined
+      - btrfssubvol_subvolumes is not none
+      - btrfssubvol_subvolumes is not string
+      - btrfssubvol_subvolumes is not mapping
+      - btrfssubvol_subvolumes is iterable
+    fail_msg: Public role variable have bad syntax. Check your configuration.
+    success_msg: Your configuration is correct.
+    quiet: true
 
 # ---------- Configure ----------
 
