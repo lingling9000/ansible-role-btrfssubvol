@@ -1,10 +1,13 @@
 ---
 # defaults file for btrfssubvol
 
+# btrfssubvol: UUID of the device, which should contain the btrfs subvolumes.
 btrfssubvol_device_uuid: null
 
+# btrfssubvol: Temporary mount point for the root volume of the btrfs device.
 btrfssubvol_rootvol_mount_point: /mnt
 
+# btrfssubvol: List of mappings defining the subvolumes to be managed.
 btrfssubvol_subvolumes: null
 
 # End of file
