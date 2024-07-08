@@ -16,6 +16,7 @@
     path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
     owner: "{{ subvolume.owner | default('root') }}"
     group: "{{ subvolume.group | default('root') }}"
+    recurse: "{{ subvolume.recurse | default(false) }}"
 
 - name: Check if mountpoint already exists
   ansible.builtin.stat:
