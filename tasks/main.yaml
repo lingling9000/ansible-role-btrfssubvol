@@ -28,6 +28,32 @@
     success_msg: Your configuration is correct.
     quiet: true
 
+- name: Check btrfssubvol_subvolumes syntax
+  ansible.builtin.assert:
+    that:
+      # subvolume.name is a string
+      - subvolume.name is defined
+      - subvolume.name is not none
+      - subvolume.name is string
+      - subvolume.name | length > 0
+
+      # subvolume.owner is a string
+      - (subvolume.owner is undefined) or (subvolume.owner is not none)
+      - (subvolume.owner is undefined) or (subvolume.owner is string)
+      - (subvolume.owner is undefined) or (subvolume.owner | length > 0)
+
+      # subvolume.group is a string
+      - (subvolume.group is undefined) or (subvolume.group is not none)
+      - (subvolume.group is undefined) or (subvolume.group is string)
+      - (subvolume.group is undefined) or (subvolume.group | length > 0)
+
+      # subvolume.recurse is a boolean
+      - (subvolume.recurse is undefined) or (subvolume.recurse is not none)
+      - (subvolume.recurse is undefined) or (subvolume.recurse is boolean)
+  loop: "{{ btrfssubvol_subvolumes }}"
+  loop_control:
+    loop_var: subvolume
+
 # ---------- Configure ----------
 
 - name: Mount btrfs root volume
