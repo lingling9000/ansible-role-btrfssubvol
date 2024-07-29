@@ -1,15 +1,19 @@
 ---
 # tasks file for btrfssubvol
 
+- name: Set variable btrfssubvol_subvolume_full_path
+  ansible.builtin.set_fact:
+    btrfssubvol_subvolume_full_path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
+
 - name: Check if subvolume already exists
   ansible.builtin.stat:
-    path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
+    path: "{{ btrfssubvol_subvolume_full_path }}"
   become: true
   register: subvolume_folder
 
 - name: Create subvolume {{ subvolume.name }}
   ansible.builtin.command:
-    cmd: btrfs subvolume create {{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}
+    cmd: btrfs subvolume create {{ btrfssubvol_subvolume_full_path }}
   become: true
   changed_when: "btrfssubvol_create.rc == 0"
   register: btrfssubvol_create
@@ -17,7 +21,7 @@
 
 - name: Set permissions for subvolume {{ subvolume.name }}
   ansible.builtin.file:
-    path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
+    path: "{{ btrfssubvol_subvolume_full_path }}"
     owner: "{{ subvolume.owner | default('root') }}"
     group: "{{ subvolume.group | default('root') }}"
     recurse: "{{ subvolume.recurse | default(false) }}"
@@ -48,5 +52,9 @@
     opts: "defaults,noatime,discard,compress=zstd,subvol=/@{{ subvolume.name }}"
     passno: 0
   become: true
+
+- name: Set internal variables to null
+  ansible.builtin.set_fact:
+    btrfssubvol_subvolume_full_path: null
 
 # End of file
