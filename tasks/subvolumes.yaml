@@ -11,6 +11,8 @@
   ansible.builtin.command:
     cmd: btrfs subvolume create {{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}
   become: true
+  changed_when: "btrfssubvol_create.rc == 0"
+  register: btrfssubvol_create
   when: not subvolume_folder.stat.exists
 
 - name: Set permissions for subvolume {{ subvolume.name }}
