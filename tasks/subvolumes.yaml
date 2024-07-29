@@ -16,6 +16,7 @@
     cmd: btrfs subvolume create {{ btrfssubvol_subvolume_full_path }}
   become: true
   changed_when: "btrfssubvol_create.rc == 0"
+  failed_when: "btrfssubvol_create.rc != 0"
   register: btrfssubvol_create
   when: not subvolume_folder.stat.exists
 
