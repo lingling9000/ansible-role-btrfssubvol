@@ -9,7 +9,7 @@
   ansible.builtin.stat:
     path: "{{ btrfssubvol_subvolume_full_path }}"
   become: true
-  register: subvolume_folder
+  register: btrfssubvol_folder
 
 - name: Create subvolume {{ subvolume.name }}
   ansible.builtin.command:
@@ -18,7 +18,7 @@
   changed_when: "btrfssubvol_create.rc == 0"
   failed_when: "btrfssubvol_create.rc != 0"
   register: btrfssubvol_create
-  when: not subvolume_folder.stat.exists
+  when: not btrfssubvol_folder.stat.exists
 
 - name: Set permissions for subvolume {{ subvolume.name }}
   ansible.builtin.file:
@@ -32,7 +32,7 @@
   ansible.builtin.stat:
     path: "/media/{{ subvolume.name }}"
   become: true
-  register: mountpoint
+  register: btrfssubvol_mountpoint
 
 - name: Create mountpoint for subvolume {{ subvolume.name }}
   ansible.builtin.file:
@@ -42,7 +42,7 @@
     group: root
     mode: "0755"
   become: true
-  when: not mountpoint.stat.exists
+  when: not btrfssubvol_mountpoint.stat.exists
 
 - name: Mount subvol and add fstab entry
   ansible.posix.mount:
@@ -56,6 +56,9 @@
 
 - name: Set internal variables to null
   ansible.builtin.set_fact:
+    btrfssubvol_create: null
+    btrfssubvol_folder: null
+    btrfssubvol_mountpoint: null
     btrfssubvol_subvolume_full_path: null
 
 # End of file
