@@ -27,6 +27,7 @@
     group: "{{ subvolume.group | default('root') }}"
     recurse: "{{ subvolume.recurse | default(false) }}"
   become: true
+  diff: true
 
 - name: Check if mountpoint already exists
   ansible.builtin.stat:
@@ -42,6 +43,7 @@
     group: root
     mode: "0755"
   become: true
+  diff: true
   when: not btrfssubvol_mountpoint.stat.exists
 
 - name: Mount subvol and add fstab entry
@@ -53,6 +55,7 @@
     opts: "defaults,noatime,discard,compress=zstd,subvol=/@{{ subvolume.name }}"
     passno: 0
   become: true
+  diff: true
 
 - name: Set internal variables to null
   ansible.builtin.set_fact:
