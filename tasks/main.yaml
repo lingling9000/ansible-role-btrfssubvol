@@ -63,6 +63,7 @@
     opts: defaults,noatime,discard,compress=zstd,subvolid=5
     state: ephemeral
     fstype: btrfs
+  become: true
 
 - name: Create subvolumes
   ansible.builtin.include_tasks:
@@ -75,5 +76,6 @@
   ansible.posix.mount:
     path: "{{ btrfssubvol_rootvol_mount_point }}"
     state: unmounted
+  become: true
 
 # End of file

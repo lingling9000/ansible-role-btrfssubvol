@@ -4,11 +4,13 @@
 - name: Check if subvolume already exists
   ansible.builtin.stat:
     path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
+  become: true
   register: subvolume_folder
 
 - name: Create subvolume {{ subvolume.name }}
   ansible.builtin.command:
     cmd: btrfs subvolume create {{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}
+  become: true
   when: not subvolume_folder.stat.exists
 
 - name: Set permissions for subvolume {{ subvolume.name }}
@@ -17,10 +19,12 @@
     owner: "{{ subvolume.owner | default('root') }}"
     group: "{{ subvolume.group | default('root') }}"
     recurse: "{{ subvolume.recurse | default(false) }}"
+  become: true
 
 - name: Check if mountpoint already exists
   ansible.builtin.stat:
     path: "/media/{{ subvolume.name }}"
+  become: true
   register: mountpoint
 
 - name: Create mountpoint for subvolume {{ subvolume.name }}
@@ -30,6 +34,7 @@
     owner: root
     group: root
     mode: "0755"
+  become: true
   when: not mountpoint.stat.exists
 
 - name: Mount subvol and add fstab entry
@@ -40,5 +45,6 @@
     state: mounted
     opts: "defaults,noatime,discard,compress=zstd,subvol=/@{{ subvolume.name }}"
     passno: 0
+  become: true
 
 # End of file
