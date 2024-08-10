@@ -1,0 +1,39 @@
+---
+# tasks file for btrfssubvol
+
+- name: Get user database
+  ansible.builtin.getent:
+    database: passwd
+  tags:
+    - checks
+    - checks-host-config
+
+- name: Get group database
+  ansible.builtin.getent:
+    database: group
+  tags:
+    - checks
+    - checks-host-config
+
+- name: Check that necessary user and groups exist
+  ansible.builtin.assert:
+    that:
+      # subvolume.owner must be an existing user
+      - (subvolume.owner is undefined) or (subvolume.owner in getent_passwd.keys())
+
+      # subvolume.group must be an existing group
+      - (subvolume.group is undefined) or (subvolume.group in getent_group.keys())
+    fail_msg: >
+      The configured user or group for subvolume '{{ subvolume.name }}' in list
+      'btrfssubvol_subvolumes' does not exist. Create it or choose another user
+      or group.
+    success_msg: All configured user and groups are present.
+    quiet: true
+  loop: "{{ btrfssubvol_subvolumes }}"
+  loop_control:
+    loop_var: subvolume
+  tags:
+    - checks
+    - checks-host-config
+
+# End of file
