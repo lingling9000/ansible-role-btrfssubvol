@@ -20,6 +20,7 @@
     state: ephemeral
     fstype: btrfs
   become: true
+  check_mode: false
 
 - name: Create subvolumes
   ansible.builtin.include_tasks:
@@ -33,5 +34,6 @@
     path: "{{ btrfssubvol_rootvol_mount_point }}"
     state: unmounted
   become: true
+  check_mode: false
 
 # End of file
