@@ -28,13 +28,20 @@
     fstype: btrfs
   become: true
   check_mode: false
+  tags:
+    - configure
 
 - name: Create subvolumes
   ansible.builtin.include_tasks:
     file: tasks/subvolumes.yaml
+    apply:
+      tags:
+        - configure
   loop: "{{ btrfssubvol_subvolumes }}"
   loop_control:
     loop_var: subvolume
+  tags:
+    - configure
 
 - name: Unmount btrfs root volume
   ansible.posix.mount:
@@ -42,5 +49,7 @@
     state: unmounted
   become: true
   check_mode: false
+  tags:
+    - configure
 
 # End of file
