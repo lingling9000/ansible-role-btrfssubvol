@@ -26,7 +26,8 @@
 - name: Set variable subvolume_mount_options
   ansible.builtin.set_fact:
     subvolume_mount_options: "{{
-        (btrfssubvol_mount_options + subvolume_mount_option_subvol) | join(',')
+        (subvolume.mount_options | default(btrfssubvol_mount_options | default(['defaults']))
+        + subvolume_mount_option_subvol) | join(',')
       }}"
 
 - name: Check if subvolume already exists

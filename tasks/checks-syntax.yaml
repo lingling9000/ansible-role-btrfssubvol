@@ -77,6 +77,23 @@
         (subvolume.group is not defined) or
         (subvolume.group | length > 0)
 
+      # subvolume.mount_options is not defined or is a list
+      - >
+        (subvolume.mount_options is not defined) or
+        (subvolume.mount_options is not none)
+      - >
+        (subvolume.mount_options is not defined) or
+        (subvolume.mount_options is not string)
+      - >
+        (subvolume.mount_options is not defined) or
+        (subvolume.mount_options is not mapping)
+      - >
+        (subvolume.mount_options is not defined) or
+        (subvolume.mount_options is iterable)
+      - >
+        (subvolume.mount_options is not defined) or
+        (subvolume.mount_options | length > 0)
+
       # subvolume.recurse is not defined or is a boolean
       - >
         (subvolume.recurse is not defined) or
@@ -92,6 +109,7 @@
 
       - owner (string, optional)
       - group (string, optional)
+      - mount_options (list / elements=string, optional)
       - recurse (boolean, optional)
 
       Consult the documentation for further information on the values.
@@ -103,5 +121,21 @@
   tags:
     - checks
     - checks-syntax
+
+- name: Include checks for mount_options per btrfssubvol_subvolumes item
+  ansible.builtin.include_tasks:
+    file: checks-syntax-var-mount-options.yaml
+  loop: "{{ btrfssubvol_subvolumes }}"
+  loop_control:
+    loop_var: subvolume
+    label: "{{ subvolume.name }}"
+  tags:
+    - checks
+    - checks-syntax
+  vars:
+    mount_options: "{{ subvolume.mount_options }}"
+    label_for_check: "subvolume '{{ subvolume.name }}'"
+  when:
+    - subvolume.mount_options is defined
 
 # End of file
