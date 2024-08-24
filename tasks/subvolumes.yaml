@@ -1,12 +1,9 @@
 ---
 # tasks file for btrfssubvol
 
-- name: Print information start subvolume creation
+- name: "Print information start subvolume configuration"
   ansible.builtin.debug:
-    msg: |
-      ------------------------------------------------------------
-      # Start creating subvolume '{{ subvolume.name }}'
-      ------------------------------------------------------------
+    msg: "========== Start configuring subvolume '{{ subvolume.name }}' =========="
 
 - name: Set variable btrfssubvol_subvolume_full_path
   ansible.builtin.set_fact:
@@ -64,12 +61,9 @@
   become: true
   diff: true
 
-- name: Print information finish subvolume creation
+- name: "Print information finish subvolume configuration"
   ansible.builtin.debug:
-    msg: |
-      ------------------------------------------------------------
-      # Successful created subvolume '{{ subvolume.name }}'
-      ------------------------------------------------------------
+    msg: "========== Finished configuring subvolume '{{ subvolume.name }}' =========="
 
 - name: Set internal variables to null
   ansible.builtin.set_fact:
