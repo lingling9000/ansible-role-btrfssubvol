@@ -7,36 +7,36 @@
 
 # ---------- Preparations ----------
 
-- name: Set variable btrfssubvol_subvolume_full_path
+- name: Set variable subvolume_full_path
   ansible.builtin.set_fact:
-    btrfssubvol_subvolume_full_path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
+    subvolume_full_path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
 
 - name: Check if subvolume already exists
   ansible.builtin.stat:
-    path: "{{ btrfssubvol_subvolume_full_path }}"
+    path: "{{ subvolume_full_path }}"
   become: true
-  register: btrfssubvol_folder
+  register: subvolume_folder
 
 - name: Check if mountpoint already exists
   ansible.builtin.stat:
     path: "/media/{{ subvolume.name }}"
   become: true
-  register: btrfssubvol_mountpoint
+  register: subvolume_mountpoint
 
 # ---------- Configuration ----------
 
 - name: Create subvolume {{ subvolume.name }}
   ansible.builtin.command:
-    cmd: btrfs subvolume create {{ btrfssubvol_subvolume_full_path }}
+    cmd: btrfs subvolume create {{ subvolume_full_path }}
   become: true
-  changed_when: "btrfssubvol_create.rc == 0"
-  failed_when: "btrfssubvol_create.rc != 0"
-  register: btrfssubvol_create
-  when: not btrfssubvol_folder.stat.exists
+  changed_when: "subvolume_cmd_create__result.rc == 0"
+  failed_when: "subvolume_cmd_create__result.rc != 0"
+  register: subvolume_cmd_create__result
+  when: not subvolume_folder.stat.exists
 
 - name: Set permissions for subvolume {{ subvolume.name }}
   ansible.builtin.file:
-    path: "{{ btrfssubvol_subvolume_full_path }}"
+    path: "{{ subvolume_full_path }}"
     owner: "{{ subvolume.owner | default('root') }}"
     group: "{{ subvolume.group | default('root') }}"
     recurse: "{{ subvolume.recurse | default(false) }}"
@@ -52,7 +52,7 @@
     mode: "0755"
   become: true
   diff: true
-  when: not btrfssubvol_mountpoint.stat.exists
+  when: not subvolume_mountpoint.stat.exists
 
 - name: Mount subvol and add fstab entry
   ansible.posix.mount:
@@ -68,10 +68,10 @@
 
 - name: Set internal variables to null
   ansible.builtin.set_fact:
-    btrfssubvol_create: null
-    btrfssubvol_folder: null
-    btrfssubvol_mountpoint: null
-    btrfssubvol_subvolume_full_path: null
+    subvolume_cmd_create__result: null
+    subvolume_folder: null
+    subvolume_mountpoint: null
+    subvolume_full_path: null
 
 - name: "Print information finish subvolume configuration"
   ansible.builtin.debug:
