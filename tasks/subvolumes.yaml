@@ -36,6 +36,7 @@
     recurse: "{{ subvolume.recurse | default(false) }}"
   become: true
   diff: true
+  ignore_errors: "{{ ansible_check_mode }}"
 
 - name: Mount subvol and add fstab entry
   ansible.posix.mount:
