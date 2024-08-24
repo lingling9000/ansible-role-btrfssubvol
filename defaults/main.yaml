@@ -3,6 +3,12 @@
 
 btrfssubvol_device_uuid: null
 
+btrfssubvol_mount_options:
+  - defaults
+  - compress=zstd
+  - discard=async
+  - noatime
+
 btrfssubvol_rootvol_mount_point: /mnt
 
 btrfssubvol_subvolumes: null

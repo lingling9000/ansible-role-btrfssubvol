@@ -11,6 +11,24 @@
   ansible.builtin.set_fact:
     subvolume_full_path: "{{ btrfssubvol_rootvol_mount_point }}/@{{ subvolume.name }}"
 
+- name: Set variable subvolume_mount_option_subvol
+  ansible.builtin.set_fact:
+    subvolume_mount_option_subvol:
+      - "{{ 'subvol=/@' ~ subvolume.name }}"
+
+- name: Set mount options defaults if none are specified
+  ansible.builtin.set_fact:
+    btrfssubvol_mount_options:
+      - defaults
+  when:
+    - btrfssubvol_mount_options | length == 0
+
+- name: Set variable subvolume_mount_options
+  ansible.builtin.set_fact:
+    subvolume_mount_options: "{{
+        (btrfssubvol_mount_options + subvolume_mount_option_subvol) | join(',')
+      }}"
+
 - name: Check if subvolume already exists
   ansible.builtin.stat:
     path: "{{ subvolume_full_path }}"
@@ -44,7 +62,7 @@
     fstype: btrfs
     path: "/media/{{ subvolume.name }}"
     state: mounted
-    opts: "defaults,noatime,discard,compress=zstd,subvol=/@{{ subvolume.name }}"
+    opts: "{{ subvolume_mount_options }}"
     passno: 0
   become: true
 
@@ -55,6 +73,7 @@
     subvolume_cmd_create__result: null
     subvolume_folder: null
     subvolume_full_path: null
+    subvolume_mount_options: null
 
 - name: "Print information finish subvolume configuration"
   ansible.builtin.debug:
