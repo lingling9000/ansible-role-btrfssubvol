@@ -38,19 +38,35 @@
       - subvolume.name is string
       - subvolume.name | length > 0
 
-      # subvolume.owner is a string
-      - (subvolume.owner is undefined) or (subvolume.owner is not none)
-      - (subvolume.owner is undefined) or (subvolume.owner is string)
-      - (subvolume.owner is undefined) or (subvolume.owner | length > 0)
+      # subvolume.owner is not defined or is a string
+      - >
+        (subvolume.owner is not defined) or
+        (subvolume.owner is not none)
+      - >
+        (subvolume.owner is not defined) or
+        (subvolume.owner is string)
+      - >
+        (subvolume.owner is not defined) or
+        (subvolume.owner | length > 0)
 
-      # subvolume.group is a string
-      - (subvolume.group is undefined) or (subvolume.group is not none)
-      - (subvolume.group is undefined) or (subvolume.group is string)
-      - (subvolume.group is undefined) or (subvolume.group | length > 0)
+      # subvolume.group is not defined or is a string
+      - >
+        (subvolume.group is not defined) or
+        (subvolume.group is not none)
+      - >
+        (subvolume.group is not defined) or
+        (subvolume.group is string)
+      - >
+        (subvolume.group is not defined) or
+        (subvolume.group | length > 0)
 
-      # subvolume.recurse is a boolean
-      - (subvolume.recurse is undefined) or (subvolume.recurse is not none)
-      - (subvolume.recurse is undefined) or (subvolume.recurse is boolean)
+      # subvolume.recurse is not defined or is a boolean
+      - >
+        (subvolume.recurse is not defined) or
+        (subvolume.recurse is not none)
+      - >
+        (subvolume.recurse is not defined) or
+        (subvolume.recurse is boolean)
     fail_msg: |
       Item syntax of 'btrfssubvol_subvolumes' is faulty. Ensure your list items
       have following syntax:
