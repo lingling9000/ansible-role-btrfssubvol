@@ -17,12 +17,6 @@
   become: true
   register: subvolume_folder
 
-- name: Check if mountpoint already exists
-  ansible.builtin.stat:
-    path: "/media/{{ subvolume.name }}"
-  become: true
-  register: subvolume_mountpoint
-
 # ---------- Configuration ----------
 
 - name: Create subvolume {{ subvolume.name }}
@@ -43,17 +37,6 @@
   become: true
   diff: true
 
-- name: Create mountpoint for subvolume {{ subvolume.name }}
-  ansible.builtin.file:
-    path: "/media/{{ subvolume.name }}"
-    state: directory
-    owner: root
-    group: root
-    mode: "0755"
-  become: true
-  diff: true
-  when: not subvolume_mountpoint.stat.exists
-
 - name: Mount subvol and add fstab entry
   ansible.posix.mount:
     src: "UUID={{ btrfssubvol_device_uuid }}"
@@ -70,7 +53,6 @@
   ansible.builtin.set_fact:
     subvolume_cmd_create__result: null
     subvolume_folder: null
-    subvolume_mountpoint: null
     subvolume_full_path: null
 
 - name: "Print information finish subvolume configuration"
