@@ -1,41 +1,72 @@
 # Ansible Role: btrfssubvol
 
-Configure subvolumes for [Btrfs](https://btrfs.readthedocs.io/).
+Configure subvolumes on [Btrfs](https://btrfs.readthedocs.io/) devices.
 
 The motivation behind this role is to automate the tedious task of creating
-Btrfs subvolumes for a volume that has not mounted their root volume
-(`subvolid=5`). That includes mounting the root volume, creating subvolumes, add
-subvolumes to `/etc/fstab` and unmount root volume again.
+Btrfs subvolumes for a volume that does not have its root volume mounted.
+(`subvolid=5`). This includes mounting the root volume, creating subvolumes,
+adding subvolumes to /etc/fstab, and unmounting the root volume. This role has
+been designed with flexibility in mind, while keeping the configuration overhead
+as low as possible.
 
 
 # Features
 
 - Create new Btrfs subvolumes.
-- Mount Btrfs subvolumes.
-- Add `/etc/fstab` entries.
+- Mount and unmount Btrfs subvolumes.
+- Add and delete `/etc/fstab` entries.
 - Configure user and group per subvolume. Recursive change is possible.
+- Configure mount options globally or per subvolume.
+- Detection and removal of duplicated subvolume mounts and `/etc/fstab` entries
+(e. g. after a path change). Can be disabled by
+`btrfssubvol_unmount_unmanaged_mounts`.
 
 
 # Limitations
 
-- Removal of subvolumes is not possible.
-- Only sub directories of `/media/` are available as mount points (properly
-changes in future).
-- Check mode: Note that the Btrfs root volume is mounted and unmounted even when
-in check mode. This is necessary to check the tasks in
-[subvolume.yaml](./tasks/subvolumes.yaml).
+- While the mount points can be removed, the subvolumes itself will be
+preserved.
 - This role is currently only tested on Arch Linux, but it should be generic
-enough to work on every distribution.
+enough to work on every distribution. Please open an issue if you face any
+problems.
+- Unmounting the unmanaged mounts is not always possible, because the targets
+might be busy. Therefore, errors on these tasks are ignored by default. If it is
+preferred that the role fail in such a case, it is possible to either modify
+`btrfssubvol_unmount_ignore_errors` or set `unmount_ignore_errors` to `false` in
+the `btrfssubvol_subvolumes` item definition.
 
 
 # Requirements
 
-- An already existing device formatted to Btrfs.
-- Btrfs file system utilities need to be available. 
-- Users and groups for the subvolumes need to exist on the target system.
+- An already existing device formatted to Btrfs on the target host.
+- Btrfs file system utilities need to be available on the target host.
+- Users and groups for the subvolumes need to exist on the target host.
+- Collection
+[community.general](https://docs.ansible.com/ansible/latest/collections/community/general/index.html)
+installed on the control host.
 
 
 # Role Variables
+
+This role is designed to run even without configuration. But then it won't do
+anything except syntax checking.
+
+The subvolumes are defined in the `btrfssubvol_subvolumes` list. However, before
+defining subvolumes, **the UUID of the target device(s) must be obtained**. This
+is necessary for the role to know on which device(s) the subvolumes should be
+created. Obtain the UUID(s) with following shell command:
+
+```bash
+# Replace /dev/sdXY with your device.
+blkid --match-tag UUID --output value /dev/sdXY
+```
+
+Set `btrfssubvol_device_uuid` to the obtained UUID. Alternatively, set the UUID
+per item in `btrfssubvol_subvolumes` using the `device_uuid` key. The latter is
+useful when managing multiple Btrfs devices.
+
+See [Example Playbook](#example-playbook) for a quick start or read on for an
+explanation of all the available variables.
 
 
 ## External Variables
@@ -45,22 +76,209 @@ None.
 
 ## Public Role Variables
 
-- `btrfssubvol_device_uuid` (string, mandatory), default `none`. UUID of the
+**Define the subvolumes**:
+
+- `btrfssubvol_subvolumes` (list / elements=dictionary), default
+`[]`. List of dictionaries defining the subvolumes to be managed. See [Defining
+Subvolumes](#defining-subvolumes) for a tutorial or jump directly to the [list
+of all supported keys](#all-subvolume-options).
+
+
+**Defaults for all subvolumes** (can be overwritten per subvolume):
+
+- `btrfssubvol_device_uuid` (string), default `none`. UUID of the
 device, which should contain the Btrfs subvolumes. Is used to determine the
 right device for mounting and fstab entries.
-- `btrfssubvol_rootvol_mount_point` (string, mandatory), default `/mnt`.
-Temporary mount point for the root volume of the Btrfs device. Modification is
-only necessary if the mount point `/mnt` is unavailable. The role will fail if
-the folder is occupied by another mount.
-- `btrfssubvol_subvolumes` (list, mandatory), default `none`. List of mappings
-defining the subvolumes to be managed.
-    - `name` (string, mandatory). The name of the subvolume. Need to be a
-    filename compatible string. This will be the name for the subvolume and
-    mount point.
-    - `owner` (string, optional). The owner (user) of the subvolume.
-    - `group` (string, optional). The group, which will own the subvolume.
-    - `recurse` (boolean, optional). If the user and group should be modified
-    recursively. Useful for modifying a already existing subvolume.
+- `btrfssubvol_mount_parent` (string), default `/media`. The parent directory
+for the subvolume mounts.
+- `btrfssubvol_mount_options` (list / elements=string), default `["defaults",
+"compress=zstd", "discard=async", "noatime"]`. Contains a list of mount options
+used for the subvolume mounts. See [Btrfs Mount Options](#btrfs-mount-options)
+for a detailed explanation.
+- `btrfssubvol_unmount_ignore_errors` (boolean), default `true`. If set to
+`true`, errors will be ignored when unmounting subvolumes. Note that this only
+affects unmounting the unmanaged mounts. It does not affect to changes of the
+mount state of the managed mount point.
+- `btrfssubvol_unmount_unmanaged_mounts` (boolean), default `true`. When set to
+`true`, the role attempts to remove mounts of a subvolume that are not managed
+by this role. This also ensures that there are no remaining mounts after
+changing the mount path with either the `btrfssubvol_mount_parent` or
+`mount_point` key in the `btrfssubvol_subvolumes` list.
+
+
+### Defining Subvolumes
+
+Before digging into subvolume definition, note that this role automatically
+appends an `@` to the subvolume name on the root volume (`subvolid=5`). This is
+a common convention for identifying Btrfs subvolumes and is therefore hardcoded
+into the role. Also, the following examples assume that
+`btrfssubvol_device_uuid` is set. Otherwise, the `device_uuid` must be set on
+each subvolume.
+
+Defining subvolumes requires only the `name` key:
+
+```yaml
+btrfssubvol_subvolumes:
+  - name: documents
+  - name: photos
+```
+
+The role will then create the subvolumes, create an `/etc/fstab` entry, create
+the mount point, and mount the subvolumes. The subvolume will be mounted under
+the directory specified in `btrfssubvol_mount_parent`. Assuming the default is
+used, this would be `/media/documents` and `/media/photos`, respectively. The
+mount point can be set per subvolume definition with the `mount_point` key.
+
+```yaml
+btrfssubvol_subvolumes:
+  # - name: documents   # Remove the corresponding item to stop managing a subvolume.
+  - name: photos
+    mount_point: /srv/nfs/photos
+```
+
+With this definition the photos subvolume will be mounted at `/srv/nfs/photos`.
+By default, the new subvolume will be owned by the _root_ user and group. This
+can be modified by specifying the `owner` and `group` keys:
+
+```yaml
+btrfssubvol_subvolumes:
+  - name: photos
+    owner: alice
+    group: photo-users
+    mount_point: /srv/nfs/photos
+```
+
+This will set the group and owner on the mounted subvolume folder. However, this
+only affects the subvolume folder itself. If it is desired to change the
+permissions on all files in the subvolume, set `recurse` to `true`. Note that
+the users and groups must exist on the system, creating users and groups is
+outside of the scope of this role. Refer to the
+[ansible.builtin.user](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/user_module.html)
+and
+[ansible.builtin.group](https://docs.ansible.com/ansible/latest/collections/ansible/builtin/group_module.html)
+modules for user and group creation, respectively.
+
+Mounting behavior can be adjusted with the`mount_state` key, which accepts all
+states of the
+[ansible.posix.mount](https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state)
+module:
+
+```yaml
+btrfssubvol_subvolumes:
+  - name: photos
+    owner: alice
+    group: photo-users
+    mount_point: /srv/nfs/photos
+    mount_state: absent
+```
+
+This configuration removes the `/etc/fstab` entry, unmounts the subvolume, and
+removes the mount point. It doesn't remove the subvolume itself. Note that the
+role will fail if the device can't be unmounted, which happens when the device
+is already in use (_target is busy_). Use `absent_from_fstab` to avoid failures,
+but remove the entries from `/etc/fstab`, so they will be gone after the next
+reboot. Another way to remove the mount is to set `mount_point` to an empty
+string:
+
+```yaml
+btrfssubvol_subvolumes:
+  - name: photos
+    owner: alice
+    group: photo-users
+    mount_point: ""
+    # mount_state: absent              # has no effect when mount_point is set to ""
+    unmount_ignore_errors: true        # already the default
+    unmount_unmanaged_mounts: true     # already the default
+```
+
+Setting `mount_point` to `""` causes the initial mount task to be skipped. With
+this configuration, all mounts of the subvolume _photos_ will be considered as
+unmanaged and therefore unmounted as long as `unmount_unmanaged_mounts` is set
+to `true`. 
+
+Note that it's is not possible to set the permissions when the subvolume isn't
+mounted. However, it is good practice to keep the appropriate keys (`owner`,
+`group`, `recurse`) defined, as they will take effect the next time the
+subvolume is mounted. Otherwise, the subvolume will be set as owned by _root_ on
+the next time it is mounted.
+
+
+#### All Subvolume Options
+
+Some values are inherited or composed from the defaults set for this role. The
+defaults can be overridden on a per-item item in `btrfssubvol_subvolumes`. The
+following table shows all the options for defining a subvolume:
+
+| Key                                  | Default                                      | Description                                                                                                               |
+|--------------------------------------|----------------------------------------------|---------------------------------------------------------------------------------------------------------------------------|
+| `device_uuid` (string)               | `{{ btrfssubvol_device_uuid }}`              | Same as `btrfssubvol_device_uuid`, but per subvolume.                                                                     |
+| `group` (string)                     | -                                            | The group of the subvolume. Will be _root_ if unset.                                                                      |
+| **`name` (string, required**)        | -                                            | The name of the subvolume. Must be a filename compatible string. This will be the name for the subvolume and mount point. |
+| `mount_options` (list)               | `{{ btrfssubvol_mount_options }}`            | Same as `btrfssubvol_mount_options`, but per subvolume.                                                                   |
+| `mount_point` (string)               | `{{ btrfssubvol_mount_parent }}/{{ name }}`  | The mount point of the subvolume. Overrides the default of being a subdirectory of `btrfssubvol_mount_parent`.            |
+| `mount_state` (string)               | -                                            | One of `["absent", "absent_from_fstab", "mounted", "present", "unmounted", "remounted", "ephemeral"]`. See [ansible.posix.mount](https://docs.ansible.com/ansible/latest/collections/ansible/posix/mount_module.html#parameter-state) documentation. Will be `mounted` if unset. |
+| `owner` (string)                     | -                                            | The owner of the subvolume. Will be _root_ if unset.                                                                      |
+| `recurse` (boolean)                  | -                                            | If the user and group should be modified recursively. Useful for modifying an already existing subvolume.                 |
+| `unmount_ignore_errors` (boolean)    | `{{ btrfssubvol_unmount_ignore_errors }}`    | Same as `btrfssubvol_unmount_ignore_errors`, but per subvolume.                                                           |
+| `unmount_unmanaged_mounts` (boolean) | `{{ btrfssubvol_unmount_unmanaged_mounts }}` | Same as `btrfssubvol_unmount_unmanaged_mounts`, but per subvolume.                                                        |
+
+Complete example with all possible values set:
+
+```yaml
+btrfssubvol_subvolumes:
+  - name: photos
+    device_uuid: yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+    owner: alice
+    group: photo-users
+    recurse: true
+    mount_options:
+      - defaults
+      - compress=no
+      - relatime
+    mount_point: /srv/nfs/photos
+    mount_state: remounted
+    unmount_unmanaged_mounts: true
+    unmount_ignore_errors: false
+```
+
+
+### Btrfs Mount Options
+
+To understand and customize the mount options, see the following man pages:
+
+- [**mount(8)** - FILESYSTEM-INDEPENDENT MOUNT OPTIONS](https://man.archlinux.org/man/mount.8#FILESYSTEM-INDEPENDENT_MOUNT_OPTIONS)
+- [**btrfs(5)** - BTRFS SPECIFIC MOUNT OPTIONS](https://btrfs.readthedocs.io/en/latest/Administration.html#btrfs-specific-mount-options)
+
+Explanation of the default of `btrfssubvol_mount_options`:
+
+- `defaults`: See link to **mount(8)** above.
+- `compress=zstd`: Btrfs specific mount option to enable compression with
+[zstd](https://facebook.github.io/zstd/). On volumes containing already
+compressed files (such as image, video, or audio files), it may be desirable to
+disable compression completely.
+- `discard=async`: Using this mount option enables asynchronous execution of the
+SSD TRIM command, which is a special feature of Btrfs. In the case of full disk
+encryption, or in some other cases, it is may be desirable to disable this with
+`nodiscard`. Refer to the following resources to make an informed decision:
+    - [Trim/discard (BTRFS
+    documentation)](https://btrfs.readthedocs.io/en/latest/Trim.html)
+    - [Solid State Drive - TRIM (Arch
+    Wiki)](https://wiki.archlinux.org/title/Solid_state_drive#TRIM)
+    - [dm-crypt - Discard/TRIM support for solid state drives (SSD)
+    (ArchWiki)](https://wiki.archlinux.org/title/Dm-crypt/Specialties#Discard/TRIM_support_for_solid_state_drives_(SSD))
+- `noatime`: This option can improve the performance of a Btrfs volume. Refer to
+[**btrfs(5)** - NOTES ON GENERIC MOUNT
+OPTIONS](https://btrfs.readthedocs.io/en/latest/btrfs-man5.html#notes-on-generic-mount-options)
+for details.
+
+The `subvol=<path>` option is derived from the name field in
+`btrfssubvol_subvolumes`. **Therefore, it neither necessary nor allowed to set
+`subvol=` or `subvolid=`!** The `btrfssubvol_mount_options` will be merged with
+the derived `subvol=<path>` option at execution time.
+
+Redefine `btrfssubvol_mount_options` to change the options. If this variable
+is set to an empty list (`[]`), the mount option `defaults` is set at execution
+time.
 
 
 ## Internal Role Variables
@@ -96,27 +314,30 @@ None.
 **Host configuration (`host_vars/somehost.mydomain.tld/main.yaml`)**:
 
 ```yaml
-# replace with an existing UUID on the system!
+# Replace with the real UUID obtained from `blkid`!
 btrfssubvol_device_uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
 btrfssubvol_subvolumes:
-  # subvolume backups will be owned by user root and group root
-  - name: backups    
+  # Subvolume backups will be owned by user root and group root.
+  - name: backups
 
-  # subvolume photos will be owned by user alice and group photo-users
-  - name: photos
-    owner: alice
-    group: photo-users
-
-  # subvolume documents will be owned by user bob and group root
+  # Subvolume documents will be owned by user bob and group office. If the
+  # permission should be changed recursively, set `recurse: true`
   - name: documents
     owner: bob
+    group: office
+
+  # Subvolume photos is on another device and mounted on a specified mount point.
+  - name: photos
+    device_uuid: yyyyyyyy-yyyy-yyyy-yyyy-yyyyyyyyyyyy
+    mount_point: /srv/nfs/photos
 ```
 
 **Playbook (`playbook.yaml`)**:
 
 ```yaml
 - name: Configure
-  hosts: somehost.mydomain.tld
+  hosts: all
   tasks:
     - name: Include role btrfssubvol
       ansible.builtin.include_role:
@@ -126,9 +347,9 @@ btrfssubvol_subvolumes:
 
 ## Pre-Check Variable Syntax
 
-In a larger playbook it may desirable to check the variable syntax in an early
-stage, to prevent aborts in the middle of the playbook run. Two files are
-provided for this case:
+In a larger playbook, it may be desirable to check variable syntax at an early
+stage. This prevents the playbook from aborting in the middle of a run. Two
+files are provided for this purpose:
 
 - [checks-syntax.yaml](./tasks/checks-syntax.yaml): Checks the syntax of role
 variables.
@@ -136,8 +357,8 @@ variables.
 configuration, especially if the users and groups specified in
 `btrfssubvol_subvolumes` exist.
 
-For example, following tasks can be added on the desired position in the
-playbook to run the syntax checks separately:
+For example, the following task can be added at the desired position in the
+playbook to perform the syntax checks separately:
 
 ```yaml
 - name: Include btrfssubvol role variable syntax checks
@@ -154,4 +375,4 @@ playbook to run the syntax checks separately:
 
 # Author Information
 
-[lingling](../../../../../)
+[lingling](../../../../../lingling)
