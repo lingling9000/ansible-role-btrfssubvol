@@ -10,6 +10,13 @@
       - btrfssubvol_device_uuid is string
       - btrfssubvol_device_uuid | length > 0
 
+      # btrfssubvol_mount_parent is a string
+      - btrfssubvol_mount_parent is defined
+      - btrfssubvol_mount_parent is not none
+      - btrfssubvol_mount_parent is string
+      - btrfssubvol_mount_parent | length > 0
+      - btrfssubvol_mount_parent[0] == "/"
+
       # btrfssubvol_mount_options is a list
       - btrfssubvol_mount_options is defined
       - btrfssubvol_mount_options is not none

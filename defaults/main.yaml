@@ -9,6 +9,8 @@ btrfssubvol_mount_options:
   - discard=async
   - noatime
 
+btrfssubvol_mount_parent: /media
+
 btrfssubvol_rootvol_mount_point: /mnt
 
 btrfssubvol_subvolumes: null
