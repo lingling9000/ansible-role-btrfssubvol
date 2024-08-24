@@ -94,6 +94,20 @@
         (subvolume.mount_options is not defined) or
         (subvolume.mount_options | length > 0)
 
+      # subvolume.mount_state is not defined or is a string
+      - >
+        (subvolume.mount_state is not defined) or
+        (subvolume.mount_state is not none)
+      - >
+        (subvolume.mount_state is not defined) or
+        (subvolume.mount_state is string)
+      - >
+        (subvolume.mount_state is not defined) or
+        (subvolume.mount_state | length > 0)
+      - >
+        (subvolume.mount_state is not defined) or
+        (subvolume.mount_state in ["absent", "absent_from_fstab", "mounted", "present", "unmounted", "remounted", "ephemeral"])
+
       # subvolume.recurse is not defined or is a boolean
       - >
         (subvolume.recurse is not defined) or
@@ -110,6 +124,7 @@
       - owner (string, optional)
       - group (string, optional)
       - mount_options (list / elements=string, optional)
+      - mount_state (string, optional)
       - recurse (boolean, optional)
 
       Consult the documentation for further information on the values.

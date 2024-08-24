@@ -45,7 +45,9 @@
   changed_when: "subvolume_cmd_create__result.rc == 0"
   failed_when: "subvolume_cmd_create__result.rc != 0"
   register: subvolume_cmd_create__result
-  when: not subvolume_folder.stat.exists
+  when:
+    - not subvolume_folder.stat.exists
+    - not subvolume.mount_state | default("present") == "absent"
 
 - name: Set permissions for subvolume {{ subvolume.name }}
   ansible.builtin.file:
@@ -56,13 +58,16 @@
   become: true
   diff: true
   ignore_errors: "{{ ansible_check_mode }}"
+  when: >
+    (subvolume_folder.stat.exists) or
+    ((subvolume_cmd_create__result.rc is defined) and (subvolume_cmd_create__result.rc == 0))
 
-- name: Mount subvol and add fstab entry
+- name: Manage mount and /etc/fstab state of subvolume {{ subvolume.name }}
   ansible.posix.mount:
     src: "UUID={{ btrfssubvol_device_uuid }}"
     fstype: btrfs
     path: "/media/{{ subvolume.name }}"
-    state: mounted
+    state: "{{ subvolume.mount_state | default('mounted') }}"
     opts: "{{ subvolume_mount_options }}"
     passno: 0
   become: true
