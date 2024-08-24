@@ -63,7 +63,6 @@
     opts: "defaults,noatime,discard,compress=zstd,subvol=/@{{ subvolume.name }}"
     passno: 0
   become: true
-  diff: true
 
 # ---------- Clean-Up ----------
 
