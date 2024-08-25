@@ -57,8 +57,10 @@
   become: true
   diff: true
   ignore_errors: "{{ ansible_check_mode }}"
-  when:
-    - subvolume_i_mount_state == "mounted"
+  when: >
+    (subvolume_i_mount_state == "mounted")
+    or (subvolume_i_mount_state == "ephemeral")
+    or (subvolume_i_mount_state == "remounted")
 
 # ---------- Clean-Up ----------
 
