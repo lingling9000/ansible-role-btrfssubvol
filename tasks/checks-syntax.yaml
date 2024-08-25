@@ -24,12 +24,6 @@
       - btrfssubvol_mount_options is not mapping
       - btrfssubvol_mount_options is iterable
 
-      # btrfssubvol_rootvol_mount_point is a string
-      - btrfssubvol_rootvol_mount_point is defined
-      - btrfssubvol_rootvol_mount_point is not none
-      - btrfssubvol_rootvol_mount_point is string
-      - btrfssubvol_rootvol_mount_point | length > 0
-
       # btrfssubvol_subvolumes is a list
       - btrfssubvol_subvolumes is defined
       - btrfssubvol_subvolumes is not none

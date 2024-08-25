@@ -11,8 +11,6 @@ btrfssubvol_mount_options:
 
 btrfssubvol_mount_parent: /media
 
-btrfssubvol_rootvol_mount_point: /mnt
-
 btrfssubvol_subvolumes: null
 
 # End of file
