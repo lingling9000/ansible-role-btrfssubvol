@@ -1,7 +1,7 @@
 ---
 # tasks file for btrfssubvol
 
-- name: Check public role variable syntax
+- name: "Check public role variable syntax"
   ansible.builtin.assert:
     that:
       # btrfssubvol_device_uuid is a string
@@ -37,7 +37,7 @@
     - checks
     - checks-syntax
 
-- name: Include checks for btrfssubvol_mount_options
+- name: "Include checks for btrfssubvol_mount_options"
   ansible.builtin.include_tasks:
     file: checks-syntax-var-mount-options.yaml
   tags:
@@ -47,7 +47,7 @@
     mount_options: "{{ btrfssubvol_mount_options }}"
     label_for_check: "'btrfssubvol_mount_options'"
 
-- name: Check btrfssubvol_subvolumes syntax
+- name: "Check btrfssubvol_subvolumes syntax"
   ansible.builtin.assert:
     that:
       # subvolume.name is a string
@@ -152,7 +152,7 @@
     - checks
     - checks-syntax
 
-- name: Include checks for mount_options per btrfssubvol_subvolumes item
+- name: "Include checks for mount_options per btrfssubvol_subvolumes item"
   ansible.builtin.include_tasks:
     file: checks-syntax-var-mount-options.yaml
   loop: "{{ btrfssubvol_subvolumes }}"

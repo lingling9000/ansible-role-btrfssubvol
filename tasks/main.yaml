@@ -3,14 +3,14 @@
 
 # ---------- Checks ----------
 
-- name: Include checks for role variable syntax
+- name: "Include checks for role variable syntax"
   ansible.builtin.include_tasks:
     file: checks-syntax.yaml
   tags:
     - checks
     - checks-syntax
 
-- name: Include checks for host configuration
+- name: "Include checks for host configuration"
   ansible.builtin.include_tasks:
     file: checks-host-config.yaml
   tags:
@@ -19,7 +19,7 @@
 
 # ---------- Configure ----------
 
-- name: Create subvolumes
+- name: "Create subvolumes"
   ansible.builtin.include_tasks:
     file: tasks/subvolumes.yaml
     apply:

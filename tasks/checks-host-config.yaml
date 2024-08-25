@@ -1,21 +1,21 @@
 ---
 # tasks file for btrfssubvol
 
-- name: Get user database
+- name: "Get user database"
   ansible.builtin.getent:
     database: passwd
   tags:
     - checks
     - checks-host-config
 
-- name: Get group database
+- name: "Get group database"
   ansible.builtin.getent:
     database: group
   tags:
     - checks
     - checks-host-config
 
-- name: Check that necessary user and groups exist
+- name: "Check that necessary user and groups exist"
   ansible.builtin.assert:
     that:
       # subvolume.owner must be an existing user
