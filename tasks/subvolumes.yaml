@@ -16,6 +16,7 @@
     subvolume_i_mount_option_subvol: "{{ 'subvol=/@' ~ subvolume.name }}"
     subvolume_i_mount_point: "{{ subvolume.mount_point | default((btrfssubvol_mount_parent, subvolume.name) | path_join) }}"
     subvolume_i_mount_state: "{{ subvolume.mount_state | default('mounted') }}"
+    subvolume_i_unmount_unmanaged_mounts: "{{ subvolume.unmount_unmanaged_mounts | default(btrfssubvol_unmount_unmanaged_mounts) }}"
 
 - name: "Set mount option defaults if none are specified"
   ansible.builtin.set_fact:
@@ -37,6 +38,7 @@
     filesystem_uuid: "{{ subvolume_i_device_uuid }}"
     automount: true
   become: true
+  register: subvolume_create__result
 
 - name: "Manage mount and /etc/fstab state of subvolume {{ subvolume.name }}"
   ansible.posix.mount:
@@ -62,16 +64,58 @@
     or (subvolume_i_mount_state == "ephemeral")
     or (subvolume_i_mount_state == "remounted")
 
+- name: Try to unmount unmanaged mounts
+  when:
+    - subvolume_i_unmount_unmanaged_mounts
+  block:
+    - name: Set variable subvolume_unmanaged_mounts for {{ subvolume.name }}
+      ansible.builtin.set_fact:
+        subvolume_unmanaged_mounts: "{{
+            (subvolume_create__result.filesystem.subvolumes
+            | selectattr('path', 'equalto', subvolume_i_btrfs_path) | first).mountpoints
+            | reject('equalto', subvolume_i_mount_point)
+          }}"
+
+    - name: "Set state=absent for unmanaged mounts of {{ subvolume.name }}"
+      ansible.posix.mount:
+        path: "{{ mount_point }}"
+        state: absent
+      become: true
+      ignore_errors: true
+      loop: "{{ subvolume_unmanaged_mounts }}"
+      loop_control:
+        loop_var: mount_point
+      register:
+        subvolume_unmanaged_absent__result
+
+    - name: "Set state=unmounted for non /etc/fstab mounts of {{ subvolume.name }}"
+      ansible.posix.mount:
+        path: "{{ mount_absent_result.invocation.module_args.path }}"
+        state: unmounted
+      become: true
+      ignore_errors: true
+      loop: "{{ subvolume_unmanaged_absent__result.results }}"
+      loop_control:
+        loop_var: mount_absent_result
+      when:
+        - subvolume_unmanaged_absent__result.results is defined
+        - not mount_absent_result.changed
+        - not mount_absent_result.failed
+
 # ---------- Clean-Up ----------
 
 - name: "Nullify internal variables for {{ subvolume.name }}"
   ansible.builtin.set_fact:
+    subvolume_create__result: null
     subvolume_i_btrfs_path: null
     subvolume_i_device_uuid: null
-    subvolume_i_mount_options: null
     subvolume_i_mount_option_subvol: null
+    subvolume_i_mount_options: null
     subvolume_i_mount_point: null
     subvolume_i_mount_state: null
+    subvolume_i_unmount_unmanaged_mounts: null
+    subvolume_unmanaged_absent__result: null
+    subvolume_unmanaged_mounts: null
 
 - name: "Print information finish subvolume configuration"
   ansible.builtin.debug:
