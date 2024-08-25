@@ -56,6 +56,17 @@
       - subvolume.name is string
       - subvolume.name | length > 0
 
+      # subvolume.device_uuid is not defined or is a string
+      - >
+        (subvolume.device_uuid is not defined) or
+        (subvolume.device_uuid is not none)
+      - >
+        (subvolume.device_uuid is not defined) or
+        (subvolume.device_uuid is string)
+      - >
+        (subvolume.device_uuid is not defined) or
+        (subvolume.device_uuid | length > 0)
+
       # subvolume.owner is not defined or is a string
       - >
         (subvolume.owner is not defined) or
@@ -91,9 +102,6 @@
       - >
         (subvolume.mount_options is not defined) or
         (subvolume.mount_options is iterable)
-      - >
-        (subvolume.mount_options is not defined) or
-        (subvolume.mount_options | length > 0)
 
       # subvolume.mount_point is not defined or is a string
       - >
@@ -137,6 +145,7 @@
       - name (string, mandatory)
 
       - owner (string, optional)
+      - device_uuid (string, optional)
       - group (string, optional)
       - mount_options (list / elements=string, optional)
       - mount_state (string, optional)

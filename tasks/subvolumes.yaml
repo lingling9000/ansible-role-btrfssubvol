@@ -7,48 +7,50 @@
 
 # ---------- Preparations ----------
 
-- name: "Set variable subvolume_mount_option_subvol"
+- name: "Set internal variables for {{ subvolume.name }}"
   ansible.builtin.set_fact:
-    subvolume_mount_option_subvol:
-      - "{{ 'subvol=/@' ~ subvolume.name }}"
+    # The variables contain a _i prefix to illustrate them as internal variables.
+    subvolume_i_btrfs_path: "/@{{ subvolume.name }}"
+    subvolume_i_device_uuid: "{{ subvolume.device_uuid | default(btrfssubvol_device_uuid) }}"
+    subvolume_i_mount_options: "{{ (subvolume.mount_options | default(btrfssubvol_mount_options | default([]))) }}"
+    subvolume_i_mount_option_subvol: "{{ 'subvol=/@' ~ subvolume.name }}"
+    subvolume_i_mount_point: "{{ subvolume.mount_point | default((btrfssubvol_mount_parent, subvolume.name) | path_join) }}"
+    subvolume_i_mount_state: "{{ subvolume.mount_state | default('mounted') }}"
 
-- name: "Set mount options defaults if none are specified"
+- name: "Set mount option defaults if none are specified"
   ansible.builtin.set_fact:
-    btrfssubvol_mount_options:
+    subvolume_i_mount_options:
       - defaults
   when:
-    - btrfssubvol_mount_options | length == 0
+    - subvolume_i_mount_options | length == 0
 
-- name: "Set variable subvolume_mount_options"
+- name: "Merge mount options"
   ansible.builtin.set_fact:
-    subvolume_mount_options: "{{
-        (subvolume.mount_options | default(btrfssubvol_mount_options | default(['defaults']))
-        + subvolume_mount_option_subvol) | join(',')
-      }}"
+    subvolume_i_mount_options: "{{ (subvolume_i_mount_options + [subvolume_i_mount_option_subvol]) }}"
 
 # ---------- Configuration ----------
 
 - name: "Create subvolume {{ subvolume.name }}"
   community.general.btrfs_subvolume:
-    name: "/@{{ subvolume.name }}"
+    name: "{{ subvolume_i_btrfs_path }}"
     state: present
-    filesystem_uuid: "{{ btrfssubvol_device_uuid }}"
+    filesystem_uuid: "{{ subvolume_i_device_uuid }}"
     automount: true
   become: true
 
 - name: "Manage mount and /etc/fstab state of subvolume {{ subvolume.name }}"
   ansible.posix.mount:
-    src: "UUID={{ btrfssubvol_device_uuid }}"
+    src: "UUID={{ subvolume_i_device_uuid }}"
     fstype: btrfs
-    path: "{{ subvolume.mount_point | default((btrfssubvol_mount_parent, subvolume.name) | path_join) }}"
-    state: "{{ subvolume.mount_state | default('mounted') }}"
-    opts: "{{ subvolume_mount_options }}"
+    path: "{{ subvolume_i_mount_point }}"
+    state: "{{ subvolume_i_mount_state }}"
+    opts: "{{ subvolume_i_mount_options | join(',') }}"
     passno: 0
   become: true
 
 - name: "Set permissions for subvolume {{ subvolume.name }}"
   ansible.builtin.file:
-    path: "{{ subvolume.mount_point | default((btrfssubvol_mount_parent, subvolume.name) | path_join) }}"
+    path: "{{ subvolume_i_mount_point }}"
     owner: "{{ subvolume.owner | default('root') }}"
     group: "{{ subvolume.group | default('root') }}"
     recurse: "{{ subvolume.recurse | default(false) }}"
@@ -56,13 +58,18 @@
   diff: true
   ignore_errors: "{{ ansible_check_mode }}"
   when:
-    - (subvolume.mount_state | default('mounted')) == "mounted"
+    - subvolume_i_mount_state == "mounted"
 
 # ---------- Clean-Up ----------
 
-- name: "Nullify internal variables"
+- name: "Nullify internal variables for {{ subvolume.name }}"
   ansible.builtin.set_fact:
-    subvolume_mount_options: null
+    subvolume_i_btrfs_path: null
+    subvolume_i_device_uuid: null
+    subvolume_i_mount_options: null
+    subvolume_i_mount_option_subvol: null
+    subvolume_i_mount_point: null
+    subvolume_i_mount_state: null
 
 - name: "Print information finish subvolume configuration"
   ansible.builtin.debug:

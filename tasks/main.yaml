@@ -30,5 +30,6 @@
     loop_var: subvolume
   tags:
     - configure
+    - preparations
 
 # End of file
