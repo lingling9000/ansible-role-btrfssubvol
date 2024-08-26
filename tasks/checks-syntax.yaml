@@ -31,6 +31,11 @@
       - btrfssubvol_subvolumes is not mapping
       - btrfssubvol_subvolumes is iterable
 
+      # btrfssubvol_unmount_ignore_errors is a boolean
+      - btrfssubvol_unmount_ignore_errors is defined
+      - btrfssubvol_unmount_ignore_errors is not none
+      - btrfssubvol_unmount_ignore_errors is boolean
+
       # btrfssubvol_unmount_unmanaged_mounts is a boolean
       - btrfssubvol_unmount_unmanaged_mounts is defined
       - btrfssubvol_unmount_unmanaged_mounts is not none
@@ -144,6 +149,14 @@
         (subvolume.recurse is not defined) or
         (subvolume.recurse is boolean)
 
+      # subvolume.unmount_ignore_errors is not defined or is a boolean
+      - >
+        (subvolume.unmount_ignore_errors is not defined) or
+        (subvolume.unmount_ignore_errors is not none)
+      - >
+        (subvolume.unmount_ignore_errors is not defined) or
+        (subvolume.unmount_ignore_errors is boolean)
+
       # subvolume.unmount_unmanaged_mounts is not defined or is a boolean
       - >
         (subvolume.unmount_unmanaged_mounts is not defined) or
@@ -163,6 +176,7 @@
       - mount_options (list / elements=string, optional)
       - mount_state (string, optional)
       - recurse (boolean, optional)
+      - unmount_ignore_errors (boolean, optional)
       - unmount_unmanaged_mounts (boolean, optional)
 
       Consult the documentation for further information on the values.

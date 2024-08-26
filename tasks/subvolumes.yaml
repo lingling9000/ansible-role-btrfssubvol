@@ -16,6 +16,7 @@
     subvolume_i_mount_option_subvol: "{{ 'subvol=/@' ~ subvolume.name }}"
     subvolume_i_mount_point: "{{ subvolume.mount_point | default((btrfssubvol_mount_parent, subvolume.name) | path_join) }}"
     subvolume_i_mount_state: "{{ subvolume.mount_state | default('mounted') }}"
+    subvolume_i_unmount_ignore_errors: "{{ subvolume.unmount_ignore_errors | default(btrfssubvol_unmount_ignore_errors) }}"
     subvolume_i_unmount_unmanaged_mounts: "{{ subvolume.unmount_unmanaged_mounts | default(btrfssubvol_unmount_unmanaged_mounts) }}"
 
 - name: "Set mount option defaults if none are specified"
@@ -92,7 +93,7 @@
         path: "{{ mount_point }}"
         state: absent
       become: true
-      ignore_errors: true
+      ignore_errors: "{{ subvolume_i_unmount_ignore_errors }}"
       loop: "{{ subvolume_unmanaged_mounts }}"
       loop_control:
         loop_var: mount_point
@@ -104,7 +105,7 @@
         path: "{{ mount_absent_result.invocation.module_args.path }}"
         state: unmounted
       become: true
-      ignore_errors: true
+      ignore_errors: "{{ subvolume_i_unmount_ignore_errors }}"
       loop: "{{ subvolume_unmanaged_absent__result.results }}"
       loop_control:
         loop_var: mount_absent_result
@@ -124,6 +125,7 @@
     subvolume_i_mount_options: null
     subvolume_i_mount_point: null
     subvolume_i_mount_state: null
+    subvolume_i_unmount_ignore_errors: null
     subvolume_i_unmount_unmanaged_mounts: null
     subvolume_unmanaged_absent__result: null
     subvolume_unmanaged_mounts: null

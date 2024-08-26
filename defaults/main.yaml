@@ -13,6 +13,8 @@ btrfssubvol_mount_parent: /media
 
 btrfssubvol_subvolumes: null
 
+btrfssubvol_unmount_ignore_errors: true
+
 btrfssubvol_unmount_unmanaged_mounts: true
 
 # End of file
