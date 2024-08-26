@@ -50,6 +50,17 @@
     passno: 0
   become: true
 
+- name: "Create mount point when mount state is present for {{ subvolume.name }}"
+  ansible.builtin.file:
+    path: "{{ subvolume_i_mount_point }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  become: true
+  when:
+    - subvolume_i_mount_state == "present"
+
 - name: "Set permissions for subvolume {{ subvolume.name }}"
   ansible.builtin.file:
     path: "{{ subvolume_i_mount_point }}"
