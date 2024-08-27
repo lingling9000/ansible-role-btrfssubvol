@@ -50,6 +50,8 @@
     opts: "{{ subvolume_i_mount_options | join(',') }}"
     passno: 0
   become: true
+  when:
+    - subvolume_i_mount_point | length > 0
 
 - name: "Create mount point when mount state is present for {{ subvolume.name }}"
   ansible.builtin.file:
@@ -60,6 +62,7 @@
     mode: "0755"
   become: true
   when:
+    - subvolume_i_mount_point | length > 0
     - subvolume_i_mount_state == "present"
 
 - name: "Set permissions for subvolume {{ subvolume.name }}"
@@ -71,10 +74,12 @@
   become: true
   diff: true
   ignore_errors: "{{ ansible_check_mode }}"
-  when: >
-    (subvolume_i_mount_state == "mounted")
-    or (subvolume_i_mount_state == "ephemeral")
-    or (subvolume_i_mount_state == "remounted")
+  when:
+    - subvolume_i_mount_point | length > 0
+    - >
+      (subvolume_i_mount_state == "mounted")
+      or (subvolume_i_mount_state == "ephemeral")
+      or (subvolume_i_mount_state == "remounted")
 
 - name: Try to unmount unmanaged mounts
   when:

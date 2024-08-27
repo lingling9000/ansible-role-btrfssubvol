@@ -136,9 +136,7 @@
         (subvolume.mount_point is string)
       - >
         (subvolume.mount_point is not defined) or
-        (subvolume.mount_point | length > 0)
-      - >
-        (subvolume.mount_point is not defined) or
+        (subvolume.mount_point | length == 0) or
         (subvolume.mount_point[0] == "/")
 
       # subvolume.mount_state is not defined or is a string
