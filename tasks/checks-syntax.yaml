@@ -4,11 +4,17 @@
 - name: "Check public role variable syntax"
   ansible.builtin.assert:
     that:
-      # btrfssubvol_device_uuid is a string
+      # btrfssubvol_device_uuid is none or is a string
       - btrfssubvol_device_uuid is defined
-      - btrfssubvol_device_uuid is not none
-      - btrfssubvol_device_uuid is string
-      - btrfssubvol_device_uuid | length > 0
+      - >
+        (btrfssubvol_device_uuid is none) or
+        (btrfssubvol_device_uuid is string)
+      - >
+        (btrfssubvol_device_uuid is none) or
+        (btrfssubvol_device_uuid | length > 0)
+      - >
+        (btrfssubvol_device_uuid is none) or
+        (btrfssubvol_device_uuid is ansible.builtin.match("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"))
 
       # btrfssubvol_mount_parent is a string
       - btrfssubvol_mount_parent is defined
@@ -76,6 +82,14 @@
       - >
         (subvolume.device_uuid is not defined) or
         (subvolume.device_uuid | length > 0)
+      - >
+        (subvolume.device_uuid is not defined) or
+        (subvolume.device_uuid is ansible.builtin.match("^[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}$"))
+
+      # Either btrfssubvol_device_uuid or subvolume.device_uuid need to be a UUID.
+      # The previous checks already ensure correct UUID syntax, so a comparison
+      # that one is a string is sufficient.
+      - (btrfssubvol_device_uuid is string) or (subvolume.device_uuid is string)
 
       # subvolume.owner is not defined or is a string
       - >
@@ -171,7 +185,7 @@
       - name (string, mandatory)
 
       - owner (string, optional)
-      - device_uuid (string, optional)
+      - device_uuid (string, optional): Required if btrfssubvol_device_uuid is not set.
       - group (string, optional)
       - mount_options (list / elements=string, optional)
       - mount_state (string, optional)
