@@ -11,7 +11,7 @@ btrfssubvol_mount_options:
 
 btrfssubvol_mount_parent: /media
 
-btrfssubvol_subvolumes: null
+btrfssubvol_subvolumes: []
 
 btrfssubvol_unmount_ignore_errors: true
 
