@@ -9,6 +9,11 @@ adding subvolumes to /etc/fstab, and unmounting the root volume. This role has
 been designed with flexibility in mind, while keeping the configuration overhead
 as low as possible.
 
+This role is developed on
+[Codeberg](https://codeberg.org/lingling/ansible-role-btrfssubvol) and mirrored
+to [GitHub](https://github.com/lingling9000/ansible-role-btrfssubvol). Issues
+and pull requests are welcome on both platforms.
+
 
 # Features
 
@@ -38,12 +43,17 @@ the `btrfssubvol_subvolumes` item definition.
 
 # Requirements
 
-- An already existing device formatted to Btrfs on the target host.
-- Btrfs file system utilities need to be available on the target host.
-- Users and groups for the subvolumes need to exist on the target host.
+**Control Host**:
+
 - Collection
 [community.general](https://docs.ansible.com/ansible/latest/collections/community/general/index.html)
-installed on the control host.
+installed.
+
+**Target Host**:
+
+- An already existing device formatted to Btrfs.
+- Btrfs file system utilities need to be available.
+- Users and groups for the subvolumes need to exist.
 
 
 # Installation
@@ -101,7 +111,7 @@ DEFAULT_ROLES_PATH](https://docs.ansible.com/ansible/latest/reference_appendices
     ```
 
 
-# Role Variables
+# Role Configuration
 
 This role is designed to run even without configuration. But then it won't do
 anything except syntax checking.
@@ -430,4 +440,5 @@ playbook to perform the syntax checks separately:
 
 # Author Information
 
-[lingling](../../../../../lingling)
+lingling ([Codeberg](https://codeberg.org/lingling),
+[GitHub](https://github.com/lingling9000))
