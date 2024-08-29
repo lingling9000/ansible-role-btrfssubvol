@@ -46,6 +46,61 @@ the `btrfssubvol_subvolumes` item definition.
 installed on the control host.
 
 
+# Installation
+
+This role is currently a standalone project and cannot be published on Ansible
+Galaxy. It may be converted to a collection and published there at some
+point. In the meantime, the following installation options are available:
+
+- Using `requirements.yaml` / `requirements.yml` in the Ansible project
+directory (**recommended**).
+
+    - From [Codeberg Source](https://codeberg.org/lingling/ansible-role-btrfssubvol):
+
+        ```yaml
+        ---
+        roles:
+          - name: btrfssubvol
+            src: https://codeberg.org/lingling/ansible-role-btrfssubvol
+            scm: git
+            version: v1.0.0
+        ```    
+
+    - Or from [GitHub Mirror](https://github.com/lingling9000/ansible-role-btrfssubvol):
+
+        ```yaml
+        ---
+        roles:
+          - name: btrfssubvol
+            src: https://github.com/lingling9000/ansible-role-btrfssubvole
+            scm: git
+            version: v1.0.0
+        ```    
+
+    - Afterwards, install it using Ansible Galaxy CLI:
+
+        ```bash
+        ansible-galaxy install -r requirements.yaml
+        ```
+
+- Using [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
+In this case, the Ansible project directory must be a git repository.
+
+    ```bash
+    # Change directory to your Ansible project root.
+    cd ~/path/to/ansible-project
+    git submodule add https://codeberg.org/lingling/ansible-role-btrfssubvol roles/btrfssubvol
+    ```
+
+- [Git Clone](https://git-scm.com/docs/git-clone) in the projects roles folder
+or a globally accessible roles path (see [Ansible Configuration Settings -
+DEFAULT_ROLES_PATH](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#default-roles-path)).
+
+    ```bash
+    git clone https://codeberg.org/lingling/ansible-role-btrfssubvol ~/.ansible/roles/btrfssubvol
+    ```
+
+
 # Role Variables
 
 This role is designed to run even without configuration. But then it won't do
