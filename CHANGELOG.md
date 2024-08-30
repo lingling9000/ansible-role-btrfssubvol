@@ -23,5 +23,5 @@ This first stable release includes the following features:
 - Configuration of mount options globally or per subvolume.
 - Optional detection and removal of unmanaged mount points.
 
-[Unreleased]: ../../../compare/v1.0.0..HEAD
-[1.0.0]: ../../../releases/tag/v1.0.0
+[Unreleased]: ../../../../../lingling9000/ansible-role-btrfssubvol/compare/v1.0.0..HEAD
+[1.0.0]: ../../../../../lingling9000/ansible-role-btrfssubvol/releases/tag/v1.0.0
