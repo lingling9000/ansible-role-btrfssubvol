@@ -10,7 +10,7 @@ been designed with flexibility in mind, while keeping the configuration overhead
 as low as possible.
 
 This role is developed on
-[Codeberg](https://codeberg.org/lingling/ansible-role-btrfssubvol) and mirrored
+[Codeberg](https://codeberg.org/lingling9000/ansible-role-btrfssubvol) and mirrored
 to [GitHub](https://github.com/lingling9000/ansible-role-btrfssubvol). Issues
 and pull requests are welcome on both platforms.
 
@@ -65,13 +65,13 @@ point. In the meantime, the following installation options are available:
 - Using `requirements.yaml` / `requirements.yml` in the Ansible project
 directory (**recommended**).
 
-    - From [Codeberg Source](https://codeberg.org/lingling/ansible-role-btrfssubvol):
+    - From [Codeberg Source](https://codeberg.org/lingling9000/ansible-role-btrfssubvol):
 
         ```yaml
         ---
         roles:
           - name: btrfssubvol
-            src: https://codeberg.org/lingling/ansible-role-btrfssubvol
+            src: https://codeberg.org/lingling9000/ansible-role-btrfssubvol
             scm: git
             version: v1.0.0
         ```    
@@ -99,7 +99,7 @@ In this case, the Ansible project directory must be a git repository.
     ```bash
     # Change directory to your Ansible project root.
     cd ~/path/to/ansible-project
-    git submodule add https://codeberg.org/lingling/ansible-role-btrfssubvol roles/btrfssubvol
+    git submodule add https://codeberg.org/lingling9000/ansible-role-btrfssubvol roles/btrfssubvol
     ```
 
 - [Git Clone](https://git-scm.com/docs/git-clone) in the projects roles folder
@@ -107,7 +107,7 @@ or a globally accessible roles path (see [Ansible Configuration Settings -
 DEFAULT_ROLES_PATH](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#default-roles-path)).
 
     ```bash
-    git clone https://codeberg.org/lingling/ansible-role-btrfssubvol ~/.ansible/roles/btrfssubvol
+    git clone https://codeberg.org/lingling9000/ansible-role-btrfssubvol ~/.ansible/roles/btrfssubvol
     ```
 
 
@@ -440,5 +440,7 @@ playbook to perform the syntax checks separately:
 
 # Author Information
 
-lingling ([Codeberg](https://codeberg.org/lingling),
-[GitHub](https://github.com/lingling9000))
+lingling ([Codeberg][Codeberg], [GitHub][GitHub])
+
+[Codeberg]: https://codeberg.org/lingling
+[GitHub]: https://github.com/lingling9000
