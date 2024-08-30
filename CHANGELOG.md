@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.1.1] - 2024-08-30
+
+### Added
+
+- Metadata in `meta/main.yaml` for Ansible Galaxy (`namespace`, `role_name` and
+`galaxy_tags`).
+
 ## [1.1.0] - 2024-08-30
 
 Ansible Galaxy Release.
@@ -42,6 +49,7 @@ This first stable release includes the following features:
 - Configuration of mount options globally or per subvolume.
 - Optional detection and removal of unmanaged mount points.
 
-[Unreleased]: ../../../../../lingling9000/ansible-role-btrfssubvol/compare/v1.1.0..HEAD
+[Unreleased]: ../../../../../lingling9000/ansible-role-btrfssubvol/compare/v1.1.1..HEAD
+[1.1.0]: ../../../../../lingling9000/ansible-role-btrfssubvol/compare/v1.1.0..v1.1.1
 [1.1.0]: ../../../../../lingling9000/ansible-role-btrfssubvol/compare/v1.0.0..v1.1.0
 [1.0.0]: ../../../../../lingling9000/ansible-role-btrfssubvol/releases/tag/v1.0.0
