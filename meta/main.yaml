@@ -1,15 +1,24 @@
 ---
 # meta file for btrfssubvol
 
+dependencies: []
+
 galaxy_info:
   author: lingling
   description: Configure subvolumes on btrfs devices.
-  license: UNLICENSE
+  license: The Unlicense
+  namespace: lingling9000
+  role_name: btrfssubvol
 
   min_ansible_version: "2.8"
 
-  galaxy_tags: []
-
-dependencies: []
+  galaxy_tags:
+    - btrfs
+    - filesystem
+    - mount
+    - permissions
+    - subvolumes
+    - system
+    - unmount
 
 # End of file
