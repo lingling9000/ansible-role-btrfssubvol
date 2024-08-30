@@ -443,7 +443,7 @@ playbook to perform the syntax checks separately:
 
 ## License
 
-[UNLICENSE](./LICENSE)
+[The Unlicense](./LICENSE)
 
 ## Author Information
 
