@@ -14,8 +14,7 @@ This role is developed on
 to [GitHub](https://github.com/lingling9000/ansible-role-btrfssubvol). Issues
 and pull requests are welcome on both platforms.
 
-
-# Features
+## Features
 
 - Create new Btrfs subvolumes.
 - Mount and unmount Btrfs subvolumes.
@@ -26,8 +25,7 @@ and pull requests are welcome on both platforms.
 (e. g. after a path change). Can be disabled by
 `btrfssubvol_unmount_unmanaged_mounts`.
 
-
-# Limitations
+## Limitations
 
 - While the mount points can be removed, the subvolumes itself will be
 preserved.
@@ -40,8 +38,7 @@ preferred that the role fail in such a case, it is possible to either modify
 `btrfssubvol_unmount_ignore_errors` or set `unmount_ignore_errors` to `false` in
 the `btrfssubvol_subvolumes` item definition.
 
-
-# Requirements
+## Requirements
 
 **Control Host**:
 
@@ -55,8 +52,7 @@ installed.
 - Btrfs file system utilities need to be available.
 - Users and groups for the subvolumes need to exist.
 
-
-# Installation
+## Installation
 
 This role is currently a standalone project and cannot be published on Ansible
 Galaxy. It may be converted to a collection and published there at some
@@ -65,7 +61,7 @@ point. In the meantime, the following installation options are available:
 - Using `requirements.yaml` / `requirements.yml` in the Ansible project
 directory (**recommended**).
 
-    - From [Codeberg Source](https://codeberg.org/lingling9000/ansible-role-btrfssubvol):
+  - From [Codeberg Source](https://codeberg.org/lingling9000/ansible-role-btrfssubvol):
 
         ```yaml
         ---
@@ -74,9 +70,9 @@ directory (**recommended**).
             src: https://codeberg.org/lingling9000/ansible-role-btrfssubvol
             scm: git
             version: v1.0.0
-        ```    
+        ```
 
-    - Or from [GitHub Mirror](https://github.com/lingling9000/ansible-role-btrfssubvol):
+  - Or from [GitHub Mirror](https://github.com/lingling9000/ansible-role-btrfssubvol):
 
         ```yaml
         ---
@@ -85,9 +81,9 @@ directory (**recommended**).
             src: https://github.com/lingling9000/ansible-role-btrfssubvole
             scm: git
             version: v1.0.0
-        ```    
+        ```
 
-    - Afterwards, install it using Ansible Galaxy CLI:
+  - Afterwards, install it using Ansible Galaxy CLI:
 
         ```bash
         ansible-galaxy install -r requirements.yaml
@@ -110,8 +106,7 @@ DEFAULT_ROLES_PATH](https://docs.ansible.com/ansible/latest/reference_appendices
     git clone https://codeberg.org/lingling9000/ansible-role-btrfssubvol ~/.ansible/roles/btrfssubvol
     ```
 
-
-# Role Configuration
+## Role Configuration
 
 This role is designed to run even without configuration. But then it won't do
 anything except syntax checking.
@@ -122,7 +117,7 @@ is necessary for the role to know on which device(s) the subvolumes should be
 created. Obtain the UUID(s) with following shell command:
 
 ```bash
-# Replace /dev/sdXY with your device.
+## Replace /dev/sdXY with your device.
 blkid --match-tag UUID --output value /dev/sdXY
 ```
 
@@ -133,13 +128,11 @@ useful when managing multiple Btrfs devices.
 See [Example Playbook](#example-playbook) for a quick start or read on for an
 explanation of all the available variables.
 
-
-## External Variables
+### External Variables
 
 None.
 
-
-## Public Role Variables
+### Public Role Variables
 
 **Define the subvolumes**:
 
@@ -147,7 +140,6 @@ None.
 `[]`. List of dictionaries defining the subvolumes to be managed. See [Defining
 Subvolumes](#defining-subvolumes) for a tutorial or jump directly to the [list
 of all supported keys](#all-subvolume-options).
-
 
 **Defaults for all subvolumes** (can be overwritten per subvolume):
 
@@ -170,8 +162,7 @@ by this role. This also ensures that there are no remaining mounts after
 changing the mount path with either the `btrfssubvol_mount_parent` or
 `mount_point` key in the `btrfssubvol_subvolumes` list.
 
-
-### Defining Subvolumes
+#### Defining Subvolumes
 
 Before digging into subvolume definition, note that this role automatically
 appends an `@` to the subvolume name on the root volume (`subvolid=5`). This is
@@ -259,7 +250,7 @@ btrfssubvol_subvolumes:
 Setting `mount_point` to `""` causes the initial mount task to be skipped. With
 this configuration, all mounts of the subvolume _photos_ will be considered as
 unmanaged and therefore unmounted as long as `unmount_unmanaged_mounts` is set
-to `true`. 
+to `true`.
 
 Note that it's is not possible to set the permissions when the subvolume isn't
 mounted. However, it is good practice to keep the appropriate keys (`owner`,
@@ -267,8 +258,7 @@ mounted. However, it is good practice to keep the appropriate keys (`owner`,
 subvolume is mounted. Otherwise, the subvolume will be set as owned by _root_ on
 the next time it is mounted.
 
-
-#### All Subvolume Options
+##### All Subvolume Options
 
 Some values are inherited or composed from the defaults set for this role. The
 defaults can be overridden on a per-item item in `btrfssubvol_subvolumes`. The
@@ -306,8 +296,7 @@ btrfssubvol_subvolumes:
     unmount_ignore_errors: false
 ```
 
-
-### Btrfs Mount Options
+#### Btrfs Mount Options
 
 To understand and customize the mount options, see the following man pages:
 
@@ -325,11 +314,11 @@ disable compression completely.
 SSD TRIM command, which is a special feature of Btrfs. In the case of full disk
 encryption, or in some other cases, it is may be desirable to disable this with
 `nodiscard`. Refer to the following resources to make an informed decision:
-    - [Trim/discard (BTRFS
+  - [Trim/discard (BTRFS
     documentation)](https://btrfs.readthedocs.io/en/latest/Trim.html)
-    - [Solid State Drive - TRIM (Arch
+  - [Solid State Drive - TRIM (Arch
     Wiki)](https://wiki.archlinux.org/title/Solid_state_drive#TRIM)
-    - [dm-crypt - Discard/TRIM support for solid state drives (SSD)
+  - [dm-crypt - Discard/TRIM support for solid state drives (SSD)
     (ArchWiki)](https://wiki.archlinux.org/title/Dm-crypt/Specialties#Discard/TRIM_support_for_solid_state_drives_(SSD))
 - `noatime`: This option can improve the performance of a Btrfs volume. Refer to
 [**btrfs(5)** - NOTES ON GENERIC MOUNT
@@ -345,13 +334,11 @@ Redefine `btrfssubvol_mount_options` to change the options. If this variable
 is set to an empty list (`[]`), the mount option `defaults` is set at execution
 time.
 
-
-## Internal Role Variables
+### Internal Role Variables
 
 None.
 
-
-# Tags
+## Tags
 
 To simplify the testing of this role, all tasks are tagged. Check Ansible
 documentation of
@@ -368,18 +355,16 @@ comply with the configuration in variables.
 - `configure`: Added to tasks, which actually perform changes on the target host
 or prepare for them.
 
-
-# Dependencies
+## Dependencies
 
 None.
 
-
-# Example Playbook
+## Example Playbook
 
 **Host configuration (`host_vars/somehost.mydomain.tld/main.yaml`)**:
 
 ```yaml
-# Replace with the real UUID obtained from `blkid`!
+## Replace with the real UUID obtained from `blkid`!
 btrfssubvol_device_uuid: xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 
 btrfssubvol_subvolumes:
@@ -409,8 +394,7 @@ btrfssubvol_subvolumes:
         name: btrfssubvol
 ```
 
-
-## Pre-Check Variable Syntax
+### Pre-Check Variable Syntax
 
 In a larger playbook, it may be desirable to check variable syntax at an early
 stage. This prevents the playbook from aborting in the middle of a run. Two
@@ -428,17 +412,15 @@ playbook to perform the syntax checks separately:
 ```yaml
 - name: Include btrfssubvol role variable syntax checks
   ansible.builtin.include_role:
-    name: btrfssubvol 
+    name: btrfssubvol
     tasks_from: checks-syntax.yaml
 ```
 
-
-# License
+## License
 
 [UNLICENSE](./LICENSE)
 
-
-# Author Information
+## Author Information
 
 lingling ([Codeberg][Codeberg], [GitHub][GitHub])
 
