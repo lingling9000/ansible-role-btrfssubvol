@@ -54,40 +54,65 @@ installed.
 
 ## Installation
 
-This role is currently a standalone project and cannot be published on Ansible
-Galaxy. It may be converted to a collection and published there at some
-point. In the meantime, the following installation options are available:
+This role is published to [Ansible Galaxy](https://galaxy.ansible.com) as a
+[standalone
+role](https://galaxy.ansible.com/ui/standalone/roles/lingling9000/btrfssubvol/).
+It can be installed using the Ansible Galaxy CLI:
+
+```bash
+ansible-galaxy role install lingling9000.btrfssubvol
+```
+
+It is also possible to specify this role in the `requirements.yaml` /
+`requirements.yml` file:
+
+```yaml
+---
+roles:
+  - name: lingling9000.btrfssubvol
+    version: "v1.0.0"   # optionally specify version
+```
+
+And use the Ansible Galaxy CLI to install the definitions from the requirements
+file:
+
+```bash
+ansible-galaxy install -r requirements.yaml
+```
+
+Alternatively, the role can also be downloaded as a git repository. The
+following options are available for doing so:
 
 - Using `requirements.yaml` / `requirements.yml` in the Ansible project
-directory (**recommended**).
+directory. `version` can be every [Git commit-ish][commit-ish] object.
 
   - From [Codeberg Source](https://codeberg.org/lingling9000/ansible-role-btrfssubvol):
 
-        ```yaml
-        ---
-        roles:
-          - name: btrfssubvol
-            src: https://codeberg.org/lingling9000/ansible-role-btrfssubvol
-            scm: git
-            version: v1.0.0
-        ```
+    ```yaml
+    ---
+    roles:
+      - name: lingling9000.btrfssubvol
+        src: https://codeberg.org/lingling9000/ansible-role-btrfssubvol
+        scm: git
+        version: main
+    ```
 
   - Or from [GitHub Mirror](https://github.com/lingling9000/ansible-role-btrfssubvol):
 
-        ```yaml
-        ---
-        roles:
-          - name: btrfssubvol
-            src: https://github.com/lingling9000/ansible-role-btrfssubvole
-            scm: git
-            version: v1.0.0
-        ```
+    ```yaml
+    ---
+    roles:
+      - name: lingling9000.btrfssubvol
+        src: https://github.com/lingling9000/ansible-role-btrfssubvole
+        scm: git
+        version: main
+    ```
 
   - Afterwards, install it using Ansible Galaxy CLI:
 
-        ```bash
-        ansible-galaxy install -r requirements.yaml
-        ```
+    ```bash
+    ansible-galaxy install -r requirements.yaml
+    ```
 
 - Using [Git Submodules](https://git-scm.com/book/en/v2/Git-Tools-Submodules).
 In this case, the Ansible project directory must be a git repository.
@@ -95,7 +120,7 @@ In this case, the Ansible project directory must be a git repository.
     ```bash
     # Change directory to your Ansible project root.
     cd ~/path/to/ansible-project
-    git submodule add https://codeberg.org/lingling9000/ansible-role-btrfssubvol roles/btrfssubvol
+    git submodule add https://codeberg.org/lingling9000/ansible-role-btrfssubvol roles/lingling9000.btrfssubvol
     ```
 
 - [Git Clone](https://git-scm.com/docs/git-clone) in the projects roles folder
@@ -103,7 +128,7 @@ or a globally accessible roles path (see [Ansible Configuration Settings -
 DEFAULT_ROLES_PATH](https://docs.ansible.com/ansible/latest/reference_appendices/config.html#default-roles-path)).
 
     ```bash
-    git clone https://codeberg.org/lingling9000/ansible-role-btrfssubvol ~/.ansible/roles/btrfssubvol
+    git clone https://codeberg.org/lingling9000/ansible-role-btrfssubvol ~/.ansible/roles/lingling9000.btrfssubvol
     ```
 
 ## Role Configuration
@@ -389,9 +414,9 @@ btrfssubvol_subvolumes:
 - name: Configure
   hosts: all
   tasks:
-    - name: Include role btrfssubvol
+    - name: Include role lingling9000.btrfssubvol
       ansible.builtin.include_role:
-        name: btrfssubvol
+        name: lingling9000.btrfssubvol
 ```
 
 ### Pre-Check Variable Syntax
@@ -410,9 +435,9 @@ For example, the following task can be added at the desired position in the
 playbook to perform the syntax checks separately:
 
 ```yaml
-- name: Include btrfssubvol role variable syntax checks
+- name: Include lingling9000.btrfssubvol role variable syntax checks
   ansible.builtin.include_role:
-    name: btrfssubvol
+    name: lingling9000.btrfssubvol
     tasks_from: checks-syntax.yaml
 ```
 
@@ -424,5 +449,6 @@ playbook to perform the syntax checks separately:
 
 lingling ([Codeberg][Codeberg], [GitHub][GitHub])
 
+[commit-ish]: https://git-scm.com/docs/gitglossary#Documentation/gitglossary.txt-aiddefcommit-ishacommit-ishalsocommittish
 [Codeberg]: https://codeberg.org/lingling
 [GitHub]: https://github.com/lingling9000
